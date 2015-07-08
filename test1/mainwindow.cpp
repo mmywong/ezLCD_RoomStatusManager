@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
+
     ui->tableWidget->setColumnCount(3);
     ui->tableWidget->setRowCount(50);
     ui->tableWidget->setShowGrid(false);
@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->setItem(i%10,1,new QTableWidgetItem("Room #" + QString::number(i)));
         ui->tableWidget->setItem(i%10,2, new QTableWidgetItem("Employee #" + QString::number(i)));
     }
-
+    /*
     connect(&timer, SIGNAL(timeout()), this, SLOT(comm()));
     timer.start(100);
 
@@ -185,6 +185,9 @@ void MainWindow::on_viewStatusButton_clicked(){
        ui->viewRoomButton->setStyleSheet("background-color:white");
        ui->viewStaffButton->setStyleSheet("background-color:white");
    }
+
+
+
 }
 
 void MainWindow::on_viewRoomButton_clicked(){
