@@ -27,10 +27,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_changeStatusIdle_clicked();
-    void on_changeStatusDND_clicked();
-    void on_changeStatusHK_clicked();
-    void comm();
+  //  void on_changeStatusIdle_clicked();
+    //void on_changeStatusDND_clicked();
+    //void on_changeStatusHK_clicked();
+    //void comm();
     void on_viewStatusButton_clicked();
     void on_viewRoomButton_clicked();
     void on_viewStaffButton_clicked();

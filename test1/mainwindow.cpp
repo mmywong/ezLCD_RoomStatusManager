@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /*
     ui->tableWidget->setColumnCount(3);
     ui->tableWidget->setRowCount(50);
     ui->tableWidget->setShowGrid(false);
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer.start(100);
 
     socket = new QUdpSocket(this);
+    */
 }
 
 MainWindow::~MainWindow()
@@ -53,7 +55,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/* from Derek; note: commented out are buttons not yet made*/
+/* from Derek; note: commented out are buttons not yet made
 void MainWindow::on_changeStatusIdle_clicked()
 {
 
@@ -115,8 +117,9 @@ void MainWindow::on_changeStatusHK_clicked()
     state = 40;
     qDebug() << "HK button";
 }
+*/
 
-
+/*
 void MainWindow::comm()
 {
     // for QT to send packets to Arduino
@@ -166,6 +169,7 @@ void MainWindow::comm()
         qDebug() << "read datagram.data().toInt() = " << QString(datagram.data()).toInt();
     }
 }
+*/
 
 void MainWindow::on_viewStatusButton_clicked(){
    if(checkStatus == 0){
@@ -186,8 +190,8 @@ void MainWindow::on_viewStatusButton_clicked(){
 void MainWindow::on_viewRoomButton_clicked(){
    if(checkRoom == 0){
        checkRoom = 1;
-       ui->viewStatusButton->setStyleSheet("background-color: rgb(85, 255, 255)");
-       ui->viewRoomButton->setStyleSheet("background-color:white");
+       ui->viewStatusButton->setStyleSheet("background-color:white");
+       ui->viewRoomButton->setStyleSheet("background-color: rgb(85, 255, 255)");
        ui->viewStaffButton->setStyleSheet("background-color:white");
    }
    else if(checkRoom == 1){
@@ -202,9 +206,9 @@ void MainWindow::on_viewRoomButton_clicked(){
 void MainWindow::on_viewStaffButton_clicked(){
    if(checkStaff == 0){
        checkStaff = 1;
-       ui->viewStatusButton->setStyleSheet("background-color: rgb(85, 255, 255)");
+       ui->viewStatusButton->setStyleSheet("background-color:white");
        ui->viewRoomButton->setStyleSheet("background-color:white");
-       ui->viewStaffButton->setStyleSheet("background-color:white");
+       ui->viewStaffButton->setStyleSheet("background-color: rgb(85, 255, 255)");
    }
    else if(checkStaff == 1){
        checkStaff = 0;
