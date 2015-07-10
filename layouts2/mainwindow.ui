@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
-    <height>533</height>
+    <width>616</width>
+    <height>181</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,84 +17,40 @@
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="2">
-       <widget class="QPushButton" name="changeStatusDND">
+      <item row="4" column="4">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="changeStatusIdle">
         <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
+         <string notr="true">background-color:white</string>
         </property>
         <property name="text">
-         <string>Do Not Disturb</string>
+         <string>change to Idle</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
+      <item row="5" column="3">
        <widget class="QPushButton" name="changeStatusHK">
         <property name="styleSheet">
          <string notr="true">background-color:rgb(255, 255, 255)</string>
         </property>
         <property name="text">
-         <string>House Keeping</string>
+         <string>change to House Keeping</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="changeStatusIdle">
-        <property name="styleSheet">
-         <string notr="true">background-color:yellow</string>
-        </property>
-        <property name="text">
-         <string>Idle</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="viewModeButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(85,255,255)</string>
-        </property>
-        <property name="text">
-         <string>View Mode</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="viewRoomButton">
+      <item row="5" column="2">
+       <widget class="QPushButton" name="changeStatusDND">
         <property name="styleSheet">
          <string notr="true">background-color:rgb(255, 255, 255)</string>
         </property>
         <property name="text">
-         <string>Room</string>
+         <string>change to Do Not Disturb</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="viewStatusButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(85, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Status</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Time Status Change</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="viewStaffButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Staff</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QPushButton" name="editModeButton">
         <property name="styleSheet">
          <string notr="true">background-color:white</string>
@@ -104,8 +60,48 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="4">
+      <item row="4" column="0" colspan="4">
        <widget class="QTableWidget" name="tableWidget"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="viewStaffButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by/View Staff</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="viewStatusButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(85, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by/View Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="viewModeButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(85,255,255)</string>
+        </property>
+        <property name="text">
+         <string>View Mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="viewRoomButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by/View Room</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

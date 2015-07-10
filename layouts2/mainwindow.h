@@ -11,11 +11,12 @@
 #include <QDesktopWidget>
 #include <QTimer>
 #include <QtNetwork/QUdpSocket>
-#include <QAbstractTableModel>
-#include <QTableView>
 #include <time.h>
+#include <QItemSelectionModel>
+#include <QModelIndexList>
+#include <sstream>
 
-const int SCK_SIZE = 4;
+const int SCK_SIZE = 2;
 
 namespace Ui {
 class MainWindow;
@@ -31,21 +32,18 @@ public:
 
 private slots:
 
-    void on_changeStatusIdle_clicked();
-    void on_changeStatusDND_clicked();
-    void on_changeStatusHK_clicked();
-    void comm();
-    void on_viewStatusButton_clicked();
-    void on_viewRoomButton_clicked();
-    void on_viewStaffButton_clicked();
-    void on_viewModeButton_clicked();
-    void on_editModeButton_clicked();
+    void changeStatusOption();
+    void communicate_Qt_Arduino();
+    void changeViewOption();
+    void ModeButton_clicked();
+
+    void on_comboBox_activated(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
     QTimer timer;
     QUdpSocket *socket;
-    QUdpSocket *socketList[2];
+    QUdpSocket *socketList[SCK_SIZE];
 };
 
 #endif // MAINWINDOW_H

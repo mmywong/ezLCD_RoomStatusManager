@@ -6,9 +6,13 @@
 #include <string.h>
 
 ezLCD3 lcd;
-byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCE }; 
-byte ip[] = { 172, 21, 42, 56 };    
+byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCF }; 
+byte ip[] = { 172, 21, 42, 57 };    
+char *ipaddress = "172.21.42.57";
 byte localPort = 99;
+char room[10] = "4012";
+char roombuf[10];
+
 EthernetUDP Udp;
 static char buffer2[UDP_TX_PACKET_MAX_SIZE];
 
@@ -92,6 +96,7 @@ void Tick_State(){
 }
 
 void setup() {
+  
   lcd.begin(EZM_BAUD_RATE);
   lcd.string(1, " ");
   
@@ -99,6 +104,7 @@ void setup() {
   Udp.begin(localPort);
   
   state = Initial;
+  strcpy(roombuf, room);
 }
 
 void loop() {
@@ -117,7 +123,7 @@ void HomeM(){ // result 4 = Home screen
   lcd.color(BLACK); 
   lcd.xy("cc");
   lcd.font("Serif72");
-  lcd.println("404\"\"cc");
+  lcd.println(strcat(roombuf,"\"\"cc"));
   lcd.touchZone(1,20, 20, 280,200, 1);
 }
 
@@ -172,6 +178,16 @@ void writeStatus(int x){
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
     Udp.write(buffer);
     Udp.endPacket();
+
+    strcpy(buffer, room);
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+    Udp.write(buffer);
+    Udp.endPacket();
+
+    strcpy(buffer, ipaddress);
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+    Udp.write(buffer);
+    Udp.endPacket();
   }
 }
 
@@ -183,7 +199,7 @@ void HomeD(){ // result 4 = Home screen
   lcd.color(BLACK); 
   lcd.xy("cc");
   lcd.font("Serif72");
-  lcd.println("404\"\"cc");
+  lcd.println(strcat(roombuf,"\"\"cc"));
   lcd.touchZone(1,20, 20, 280,200, 1); 
 }
 
@@ -194,7 +210,7 @@ void HomeH(){ // result 4 = Home screen
   lcd.color(BLACK); 
   lcd.xy("cc");
   lcd.font("Serif72");
-  lcd.println("404\"\"cc");
+  lcd.println(strcat(roombuf,"\"\"cc"));
   lcd.touchZone(1,20, 20, 280,200, 1);
 }
 
