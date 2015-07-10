@@ -40,8 +40,26 @@ MainWindow::MainWindow(QWidget *parent) :
 
     srand(time(NULL));  // for generating random employee ID number
 
-    // ============ START of intiailizing random Rooms ============
+    // ============ START of initializing random Rooms ============
     // initialize random status of rooms, room numbers, and random employee IDs
+
+    //5 storey building with 10 rooms on each floor
+    int rooms_per_floor = 10;
+    int max_rooms = 50;
+    Room roomlist[50];
+    for(int i = 0; i < max_rooms; i++)
+    {
+        //generate random room info
+        int roomNum = 100*(1+i/rooms_per_floor) + i%rooms_per_floor;
+        int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
+        int roomStatus = ((rand()%4)+1)*10;  // randomly select a number from 0/10/20/30/40
+        int timeCleaned = 1600; // temporarily hard coded since time is not displayed for prototype
+        stringstream ss;
+        ss << staffID;
+        roomlist[i] = Room(roomNum, roomStatus, ss.str(), timeCleaned);
+    }
+
+
     for(int i = 1000; i < 1020; i++)  // randomly chose room numbers ranging from 100-119
     {
         int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number

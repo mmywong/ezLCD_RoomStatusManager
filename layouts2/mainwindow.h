@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "room.h"
 #include <QMainWindow>
 #include <QApplication>
 #include <QVBoxLayout>
@@ -15,6 +16,8 @@
 #include <QItemSelectionModel>
 #include <QModelIndexList>
 #include <sstream>
+#include <string>
+#include <iostream>
 
 const int SCK_SIZE = 2;
 

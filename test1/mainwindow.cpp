@@ -65,7 +65,7 @@ void MainWindow::displayRooms()
     {
         ui->tableWidget->setItem(i,0, new QTableWidgetItem(status));
         ui->tableWidget->setItem(i,1,new QTableWidgetItem("Room #" + roomlist[i].getNumber()));
-        ui->tableWidget->setItem(i,2, new QTableWidgetItem("Employee #" + QString::number(roomlist[i].getInCharge().string())));
+        ui->tableWidget->setItem(i,2, new QTableWidgetItem("Employee #" + QString::number(roomlist[i].getInCharge())));
     }
 
 }
