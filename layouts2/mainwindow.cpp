@@ -17,6 +17,8 @@ QString HK = "House Keeping";
 QString status_states[3] = {IDLE, DND, HK};
 int MAX_ROOMS = 40;
 QString ip[5] = {"172.21.42.56", "172.21.42.57"};
+QString status_name(int stat_in_int);
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,23 +54,23 @@ MainWindow::MainWindow(QWidget *parent) :
         //generate random room info
         int roomNum = 100*(1+i/rooms_per_floor) + i%rooms_per_floor;
         int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
-        int roomStatus = ((rand()%4)+1)*10;  // randomly select a number from 0/10/20/30/40
+        int roomStatus = ((rand()%4)+1)*10;  // randomly select a number from 10/20/30/40
+        if(roomStatus == 20)
+            roomStatus = 10;
         int timeCleaned = 1600; // temporarily hard coded since time is not displayed for prototype
         stringstream ss;
         ss << staffID;
         roomlist[i] = Room(roomNum, roomStatus, ss.str(), timeCleaned);
-    }
+
+        //int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
+        //int roomStatus = rand()%3;  // randomly select 1 of the 3 room statuses: (Idle, Do Not Disturb, or House Keeping)
 
 
-    for(int i = 1000; i < 1020; i++)  // randomly chose room numbers ranging from 100-119
-    {
-        int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
-        int roomStatus = rand()%3;  // randomly select 1 of the 3 room statuses: (Idle, Do Not Disturb, or House Keeping)
 
         // create tableWidget Items (cells)
-        ui->tableWidget->setItem(i%20,0, new QTableWidgetItem(status_states[roomStatus]));
-        ui->tableWidget->setItem(i%20,1,new QTableWidgetItem("Room #" + QString::number(i)));
-        ui->tableWidget->setItem(i%20,2, new QTableWidgetItem("Employee #" + QString::number(staffID)));
+        ui->tableWidget->setItem(i,0, new QTableWidgetItem(status_name(roomStatus)));
+        ui->tableWidget->setItem(i,1,new QTableWidgetItem("Room #" + QString::number(roomlist[i].getNumber())));
+        ui->tableWidget->setItem(i,2, new QTableWidgetItem("Employee #" + QString::fromStdString(roomlist[i].getInCharge())));
 
         // change the background color of the cell respective to each room status
         if(ui->tableWidget->item(i%20,0)->text() == "Idle"){
@@ -144,9 +146,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+QString status_name(int stat_in_int){
+    if(stat_in_int == 10)
+        return IDLE;
+    //if(stat_in_int == 20)
+      //  return IDLE;
+    if(stat_in_int == 30)
+        return DND;
+    if(stat_in_int == 40)
+        return HK;
 }
 
 void MainWindow::changeStatusOption()
