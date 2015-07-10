@@ -34,7 +34,7 @@ private slots:
     void on_viewStatusButton_clicked();
     void on_viewRoomButton_clicked();
     void on_viewStaffButton_clicked();
-
+    void displayRooms();
 private:
     Ui::MainWindow *ui;
     QTimer timer;
