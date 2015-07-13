@@ -6,9 +6,9 @@
 #include <string.h>
 
 ezLCD3 lcd;
-byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCF }; 
-byte ip[] = { 172, 21, 42, 57 };    
-char *ipaddress = "172.21.42.57";
+byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCC }; 
+byte ip[] = { 172, 21, 42, 58 };    
+char *ipaddress = "172.21.42.58";
 byte localPort = 99;
 char room[10] = "4012";
 char roombuf[10];
@@ -21,6 +21,10 @@ int st = 0;
 int r = 0;
 
 enum States{Initial, Home, Select, DND, HK} state;
+
+int stateIDLE = 10;
+int stateDND = 30;
+int stateHK = 40;
 
 //State Machine function for the Hotel Door
 //Draws on Transitions, writes status to QT as state actions
@@ -40,13 +44,13 @@ void Tick_State(){
       }
       break;
     case Select:
-      if(((lcd.currentWidget==2) && (lcd.currentInfo==PRESSED)) || r == 10){
+      if(((lcd.currentWidget==2) && (lcd.currentInfo==PRESSED)) || r == stateIDLE){
            HomeM();
            state = Home;
-      }else if(((lcd.currentWidget==3) && (lcd.currentInfo==PRESSED)) || r == 30){
+      }else if(((lcd.currentWidget==3) && (lcd.currentInfo==PRESSED)) || r == stateDND){
            HomeD();
            state = DND;
-      }else if(((lcd.currentWidget==4) && (lcd.currentInfo==PRESSED)) || r == 40){
+      }else if(((lcd.currentWidget==4) && (lcd.currentInfo==PRESSED)) || r == stateHK){
            HomeH();
            state = HK;
       }
@@ -79,16 +83,16 @@ void Tick_State(){
   
   switch(state){
     case Home:
-      st = 10;
+      st = stateIDLE;
       break;
     case Select:
       st = 20;
       break;
     case DND:
-      st = 30;
+      st = stateDND;
       break;
     case HK:
-      st = 40;
+      st = stateHK;
       break;
     default:
       break;
@@ -111,20 +115,8 @@ void loop() {
   lcd.wstack(0);
   
   //Runs the state machine
-  
   Tick_State(); 
   writeStatus(st);
-}
-
-void HomeM(){ // result 4 = Home screen
-  delay(200);
-  lcd.cls(BLACK);
-  lcd.picture(0,0, "BGround2.gif");
-  lcd.color(BLACK); 
-  lcd.xy("cc");
-  lcd.font("Serif72");
-  lcd.println(strcat(roombuf,"\"\"cc"));
-  lcd.touchZone(1,20, 20, 280,200, 1);
 }
 
 //Write status to QT
@@ -156,7 +148,6 @@ void readStatus(){
 }
 */
 
-
 void writeStatus(int x){
   int packetSize = Udp.parsePacket();
   if(packetSize){
@@ -174,7 +165,13 @@ void writeStatus(int x){
       state = Select;
     }   
     itoa(x, buffer, 10);
-    
+
+    strcat(buffer, roombuf);
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+    Udp.write(buffer);
+    Udp.endPacket();
+
+    /*
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
     Udp.write(buffer);
     Udp.endPacket();
@@ -188,9 +185,20 @@ void writeStatus(int x){
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
     Udp.write(buffer);
     Udp.endPacket();
+    */
   }
 }
 
+void HomeM(){ // result 4 = Home screen
+  delay(200);
+  lcd.cls(BLACK);
+  lcd.picture(0,0, "BGround2.gif");
+  lcd.color(BLACK); 
+  lcd.xy("cc");
+  lcd.font("Serif72");
+  lcd.println(strcat(room,"\"\"cc"));
+  lcd.touchZone(1,20, 20, 280,200, 1);
+}
 
 void HomeD(){ // result 4 = Home screen
   delay(200);
@@ -199,7 +207,7 @@ void HomeD(){ // result 4 = Home screen
   lcd.color(BLACK); 
   lcd.xy("cc");
   lcd.font("Serif72");
-  lcd.println(strcat(roombuf,"\"\"cc"));
+  lcd.println(strcat(room,"\"\"cc"));
   lcd.touchZone(1,20, 20, 280,200, 1); 
 }
 
@@ -210,7 +218,7 @@ void HomeH(){ // result 4 = Home screen
   lcd.color(BLACK); 
   lcd.xy("cc");
   lcd.font("Serif72");
-  lcd.println(strcat(roombuf,"\"\"cc"));
+  lcd.println(strcat(room,"\"\"cc"));
   lcd.touchZone(1,20, 20, 280,200, 1);
 }
 
