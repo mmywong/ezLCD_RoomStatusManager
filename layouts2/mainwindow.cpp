@@ -371,8 +371,6 @@ void MainWindow::ModeButton_clicked()
     {
         ui->viewModeButton->setStyleSheet("background-color:rgb(85,255,255)");
         ui->viewStatusButton->setStyleSheet("background-color:rgb(85,255,255)");
-        ui->viewRoomButton->setStyleSheet("background-color:white");
-        ui->viewStaffButton->setStyleSheet("background-color:white");
         ui->editModeButton->setStyleSheet("background-color:white");
         checkStatus = 1;
         checkViewMode = 1;
@@ -382,13 +380,13 @@ void MainWindow::ModeButton_clicked()
     {
         ui->viewModeButton->setStyleSheet("background-color:white");
         ui->viewStatusButton->setStyleSheet("background-color:white");
-        ui->viewRoomButton->setStyleSheet("background-color:white");
-        ui->viewStaffButton->setStyleSheet("background-color:white");
         ui->editModeButton->setStyleSheet("background-color:rgb(85,255,255)");
         checkStatus = 0;
         checkViewMode = 0;
         checkEditMode = 1;
     }
+    ui->viewRoomButton->setStyleSheet("background-color:white");
+    ui->viewStaffButton->setStyleSheet("background-color:white");
 }
 
 // tool button to filter displayed info by floor
