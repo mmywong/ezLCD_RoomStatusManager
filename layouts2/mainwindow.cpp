@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //5 storey building with 10 rooms on each floor
     int rooms_per_floor = 10;
-    int max_rooms = 50;
+    int max_rooms = 40;
     Room roomlist[50];
     for(int i = 0; i < max_rooms; i++)
     {
@@ -65,8 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
         //int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
         //int roomStatus = rand()%3;  // randomly select 1 of the 3 room statuses: (Idle, Do Not Disturb, or House Keeping)
 
-
-
         // create tableWidget Items (cells)
         ui->tableWidget->setItem(i,0, new QTableWidgetItem(status_name(roomStatus)));
         ui->tableWidget->setItem(i,1,new QTableWidgetItem("Room #" + QString::number(roomlist[i].getNumber())));
@@ -82,9 +80,20 @@ MainWindow::MainWindow(QWidget *parent) :
         else if(ui->tableWidget->item(i%20,0)->text() == "House Keeping"){
             ui->tableWidget->item(i%20,0)->setBackgroundColor(Qt::green);
         }
+        if(i>=20){
+            if(ui->tableWidget->item(i%20+20,0)->text() == "Idle"){
+                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::yellow);
+            }
+            else if(ui->tableWidget->item(i%20+20,0)->text() == "Do Not Disturb"){
+                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::red);
+            }
+            else if(ui->tableWidget->item(i%20+20,0)->text() == "House Keeping"){
+                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::green);
+            }
+        }
     }
 
-    // initialize random status of rooms, room numbers, and random employee IDs
+    /* initialize random status of rooms, room numbers, and random employee IDs
     for(int i = 4000; i < 4020; i++)  // randomly chose room numbers ranging from 100-119
     {
         int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
@@ -106,6 +115,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::green);
         }
     }
+    */
     // ============ END of intiailizing random Rooms ============
 
     // filter to show information about all or specific floors
