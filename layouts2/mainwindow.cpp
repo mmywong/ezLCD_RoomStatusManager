@@ -18,7 +18,9 @@ QString status_states[3] = {IDLE, DND, HK};
 int MAX_ROOMS = 40;
 QString ip[5] = {"172.21.42.56", "172.21.42.57"};
 QString status_name(int stat_in_int);
-
+int rooms_per_floor = 10;
+const int max_rooms = 40;
+Room roomlist[max_rooms];
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,9 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // initialize random status of rooms, room numbers, and random employee IDs
 
     //4 storey building with 10 rooms on each floor
-    int rooms_per_floor = 10;
-    int max_rooms = 40;
-    Room roomlist[max_rooms];
+
     for(int i = 0; i < max_rooms; i++)
     {
         //generate random room info
@@ -160,6 +160,18 @@ void MainWindow::changeStatusOption()
                     ui->tableWidget->currentItem()->setBackgroundColor(Qt::yellow);
                     ui->tableWidget->currentItem()->setText(("Idle"));
                     qDebug() << "Item Selected";
+
+                    //change room status
+                    int col = ui->tableWidget->currentColumn() + 1;
+                    int row = ui->tableWidget->currentRow();
+                    QString room = ui->tableWidget->item(row,col)->text();
+                    room = room.remove("Room #");
+                    for(int i = 0; i<max_rooms; i++)
+                    {
+                        if(roomlist[i].getNumber() == room.toInt())
+                            roomlist[i].setStatus(10);
+                    }
+
                 }
                 else
                 {
@@ -192,6 +204,16 @@ void MainWindow::changeStatusOption()
                     ui->tableWidget->currentItem()->setText(("Do Not Disturb"));
                     qDebug() << "Item Selected";
 
+                    //change room status
+                    int col = ui->tableWidget->currentColumn() + 1;
+                    int row = ui->tableWidget->currentRow();
+                    QString room = ui->tableWidget->item(row,col)->text();
+                    room = room.remove("Room #");
+                    for(int i = 0; i<max_rooms; i++)
+                    {
+                        if(roomlist[i].getNumber() == room.toInt())
+                            roomlist[i].setStatus(30);
+                    }
                 }
                 else{
                     qDebug() << "No Item Selected";
@@ -222,6 +244,17 @@ void MainWindow::changeStatusOption()
                     ui->tableWidget->currentItem()->setBackgroundColor(Qt::green);
                     ui->tableWidget->currentItem()->setText(("House Keeping"));
                     qDebug() << "Item Selected";
+
+                    //change room status
+                    int col = ui->tableWidget->currentColumn() + 1;
+                    int row = ui->tableWidget->currentRow();
+                    QString room = ui->tableWidget->item(row,col)->text();
+                    room = room.remove("Room #");
+                    for(int i = 0; i<max_rooms; i++)
+                    {
+                        if(roomlist[i].getNumber() == room.toInt())
+                            roomlist[i].setStatus(40);
+                    }
                 }
                 else
                 {
