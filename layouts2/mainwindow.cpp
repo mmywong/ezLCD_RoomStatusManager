@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // ============ START of initializing random Rooms ============
     // initialize random status of rooms, room numbers, and random employee IDs
 
-    //5 storey building with 10 rooms on each floor
+    //4 storey building with 10 rooms on each floor
     int rooms_per_floor = 10;
     int max_rooms = 40;
     Room roomlist[50];
@@ -71,25 +71,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->setItem(i,2, new QTableWidgetItem("Employee #" + QString::fromStdString(roomlist[i].getInCharge())));
 
         // change the background color of the cell respective to each room status
-        if(ui->tableWidget->item(i%20,0)->text() == "Idle"){
-            ui->tableWidget->item(i%20,0)->setBackgroundColor(Qt::yellow);
+        if(ui->tableWidget->item(i%max_rooms,0)->text() == "Idle"){
+            ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::yellow);
         }
-        else if(ui->tableWidget->item(i%20,0)->text() == "Do Not Disturb"){
-            ui->tableWidget->item(i%20,0)->setBackgroundColor(Qt::red);
+        else if(ui->tableWidget->item(i%max_rooms,0)->text() == "Do Not Disturb"){
+            ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::red);
         }
-        else if(ui->tableWidget->item(i%20,0)->text() == "House Keeping"){
-            ui->tableWidget->item(i%20,0)->setBackgroundColor(Qt::green);
-        }
-        if(i>=20){
-            if(ui->tableWidget->item(i%20+20,0)->text() == "Idle"){
-                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::yellow);
-            }
-            else if(ui->tableWidget->item(i%20+20,0)->text() == "Do Not Disturb"){
-                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::red);
-            }
-            else if(ui->tableWidget->item(i%20+20,0)->text() == "House Keeping"){
-                ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::green);
-            }
+        else if(ui->tableWidget->item(i%max_rooms,0)->text() == "House Keeping"){
+            ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::green);
         }
     }
 
