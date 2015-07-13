@@ -1,27 +1,48 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+// determines 1 of 2 modes either to view/sort the information OR to edit the status of the rooms
 int checkViewMode = 1;
 int checkEditMode = 0;
+
+// determines the room status in the form of an int to send to/retrieve from the Arduino
+int state = 100;
+int stateIdle = 10;
+int stateDND = 30;
+int stateHK = 40;
+int stateCurrent = 100;
+
+
+// determines if Status/Staff/Room buttons have been pressed
 int checkStatus = 1;
 int checkStaff = 0;
 int checkRoom = 0;
-int state = 100;
+
+// determine if the Idle/DND/HK buttons have been pressed
 int selectIdle = 0;
 int selectDND = 0;
 int selectHK = 0;
-int buttonChange = 0;
-QString IDLE = "Idle";
-QString DND = "Do Not Disturb";
-QString HK = "House Keeping";
-QString status_states[3] = {IDLE, DND, HK};
-int MAX_ROOMS = 40;
-QString ip[5] = {"172.21.42.56", "172.21.42.57"};
-QString status_name(int stat_in_int);
-int rooms_per_floor = 10;
-const int max_rooms = 40;
-Room roomlist[max_rooms];
 
+// change text display here
+QString textIDLE = "Idle";
+QString textDND = "Do Not Disturb";
+QString textHK = "House Keeping";
+QString status_states[3] = {textIDLE, textDND, textHK};
+const char* WHITE = "background-color:white";
+const char* RED = "background-color:red";
+const char* GREEN = "background-color:green";
+const char* LIGHT_BLUE = "background-color:rgb(85,255,255)";
+const char* YELLOW = "background-color:yellow";
+
+// array of used IP addresses by Arduinos
+QString ip[5] = {"172.21.42.56", "172.21.42.57"};
+
+//
+int buttonChange = 0;
+int max_rooms = 40;
+QString status_name(int stat_in_int);
+
+// initial Main Window setup
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -30,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // intiailize configuration for tableWidget
     ui->tableWidget->setColumnCount(3); // number of columns in table
-    ui->tableWidget->setRowCount(MAX_ROOMS);   // number of rows in table
+    ui->tableWidget->setRowCount(max_rooms);   // number of rows in table
     ui->tableWidget->setShowGrid(false);    // hide the grid lines
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);    // disable editing for table cells
     ui->tableWidget->horizontalHeader()->setVisible(false); // hide the horizontal headers at the top of the table
@@ -42,13 +63,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
 
-    srand(time(NULL));  // for generating random employee ID number
-
     // ============ START of initializing random Rooms ============
     // initialize random status of rooms, room numbers, and random employee IDs
 
-    //4 storey building with 10 rooms on each floor
+    srand(time(NULL));  // for generating random employee ID number
 
+    //4 storey building with 10 rooms on each floor
+    int rooms_per_floor = 10;
+    Room roomlist[max_rooms];
     for(int i = 0; i < max_rooms; i++)
     {
         //generate random room info
@@ -71,20 +93,20 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->setItem(i,2, new QTableWidgetItem("Employee #" + QString::fromStdString(roomlist[i].getInCharge())));
 
         // change the background color of the cell respective to each room status
-        if(ui->tableWidget->item(i%max_rooms,0)->text() == "Idle"){
+        if(ui->tableWidget->item(i%max_rooms,0)->text() == textIDLE){
             ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::yellow);
         }
-        else if(ui->tableWidget->item(i%max_rooms,0)->text() == "Do Not Disturb"){
+        else if(ui->tableWidget->item(i%max_rooms,0)->text() == textDND){
             ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::red);
         }
-        else if(ui->tableWidget->item(i%max_rooms,0)->text() == "House Keeping"){
+        else if(ui->tableWidget->item(i%max_rooms,0)->text() == textHK){
             ui->tableWidget->item(i%max_rooms,0)->setBackgroundColor(Qt::green);
         }
     }
 
     // ============ END of intiailizing random Rooms ============
 
-    // filter to show information about all or specific floors
+    // initialize combobox widget for filter to show information about all or specific floors
     ui->comboBox->addItem(tr("All Floors"));
     for(int i = 1; i < 5; i++)
     {
@@ -96,7 +118,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBox->addItem(tr(str));
     }
 
-    // create multiple sockets
+    // create multiple sockets to send/retrieve data packets to/from Arduino
     for(int i = 0; i < 2; i++){
         socketList[i] = new QUdpSocket(this);
     }
@@ -121,23 +143,25 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-
+// deconstructor
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+// sets the text status for a room
 QString status_name(int stat_in_int){
-    if(stat_in_int == 10)
-        return IDLE;
+    if(stat_in_int == stateIdle)
+        return textIDLE;
     //if(stat_in_int == 20)
       //  return IDLE;
-    if(stat_in_int == 30)
-        return DND;
-    if(stat_in_int == 40)
-        return HK;
+    if(stat_in_int == stateDND)
+        return textDND;
+    if(stat_in_int == stateHK)
+        return textHK;
 }
 
+// function that controls button events for Edit Mode's Idle/DND/HK buttons and changes room's statuses by selecting a cell
 void MainWindow::changeStatusOption()
 {
     QPushButton *b = qobject_cast<QPushButton *>(sender());
@@ -146,158 +170,116 @@ void MainWindow::changeStatusOption()
         ui->tableWidget->setSelectionMode(QTableWidget::SingleSelection);
         if(ui->tableWidget->selectedItems().size() != 0)
         {
+            QTableWidgetItem *item = ui->tableWidget->currentItem();
             if(b == ui->changeStatusIdle)
             {
-                state = 10;
-                ui->changeStatusIdle->setStyleSheet("background-color:yellow");
-                ui->changeStatusDND->setStyleSheet("background-color:white");
-                ui->changeStatusHK->setStyleSheet("background-color:white");
+                state = stateIdle;
+                ui->changeStatusIdle->setStyleSheet(YELLOW);
+                ui->changeStatusDND->setStyleSheet(WHITE);
+                ui->changeStatusHK->setStyleSheet(WHITE);
 
-                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
-
-                if(ui->tableWidget->currentItem()->isSelected())
+                if(item->isSelected())
                 {
-                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::yellow);
-                    ui->tableWidget->currentItem()->setText(("Idle"));
-                    qDebug() << "Item Selected";
-
-                    //change room status
-                    int col = ui->tableWidget->currentColumn() + 1;
-                    int row = ui->tableWidget->currentRow();
-                    QString room = ui->tableWidget->item(row,col)->text();
-                    room = room.remove("Room #");
-                    for(int i = 0; i<max_rooms; i++)
+                    if(item->column() == 0)
                     {
-                        if(roomlist[i].getNumber() == room.toInt())
-                            roomlist[i].setStatus(10);
+                        item->setBackgroundColor(Qt::yellow);
+                        item->setText(textIDLE);
                     }
-
-                }
-                else
-                {
-                    qDebug() << "No Item Selectd";
                 }
             }
             else if(b == ui->changeStatusDND)
             {
-                state = 30;
+                state = stateDND;
                 if(selectDND == 0)
                 {
                     selectDND = 1;
-                    ui->changeStatusDND->setStyleSheet("background-color:red");
-                    ui->changeStatusIdle->setStyleSheet("background-color:white");
+                    ui->changeStatusDND->setStyleSheet(RED);
+                    ui->changeStatusIdle->setStyleSheet(WHITE);
                 }
                 else if(selectDND == 1)
                 {
                     selectDND = 0;
-                    ui->changeStatusDND->setStyleSheet("background-color:white");
-                    ui->changeStatusIdle->setStyleSheet("background-color:yellow");
+                    ui->changeStatusDND->setStyleSheet(WHITE);
+                    ui->changeStatusIdle->setStyleSheet(YELLOW);
                 }
                 selectHK = 0;
-                ui->changeStatusHK->setStyleSheet("background-color:white");
+                ui->changeStatusHK->setStyleSheet(WHITE);
 
-
-                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
-                if(ui->tableWidget->currentItem()->isSelected())
+                if(item->isSelected())
                 {
-                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::red);
-                    ui->tableWidget->currentItem()->setText(("Do Not Disturb"));
-                    qDebug() << "Item Selected";
-
-                    //change room status
-                    int col = ui->tableWidget->currentColumn() + 1;
-                    int row = ui->tableWidget->currentRow();
-                    QString room = ui->tableWidget->item(row,col)->text();
-                    room = room.remove("Room #");
-                    for(int i = 0; i<max_rooms; i++)
+                    if(item->column() == 0)
                     {
-                        if(roomlist[i].getNumber() == room.toInt())
-                            roomlist[i].setStatus(30);
+                        ui->tableWidget->currentItem()->setBackgroundColor(Qt::red);
+                        ui->tableWidget->currentItem()->setText(textDND);
                     }
-                }
-                else{
-                    qDebug() << "No Item Selected";
                 }
             }
             else if(b == ui->changeStatusHK)
             {
-                state = 40;
+                state = stateHK;
                 if(selectHK == 0)
                 {
                     selectHK = 1;
-                    ui->changeStatusHK->setStyleSheet("background-color:green");
-                    ui->changeStatusIdle->setStyleSheet("background-color:white");
+                    ui->changeStatusHK->setStyleSheet(GREEN);
+                    ui->changeStatusIdle->setStyleSheet(WHITE);
                 }
                 else if(selectHK == 1)
                 {
                     selectHK = 0;
-                    ui->changeStatusHK->setStyleSheet("background-color:white");
-                    ui->changeStatusIdle->setStyleSheet("background-color:yellow");
+                    ui->changeStatusHK->setStyleSheet(WHITE);
+                    ui->changeStatusIdle->setStyleSheet(YELLOW);
                 }
 
                 selectDND = 0;
-                ui->changeStatusDND->setStyleSheet("background-color:white");
+                ui->changeStatusDND->setStyleSheet(WHITE);
 
-                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
-                if(ui->tableWidget->currentItem()->isSelected())
+                if(item->isSelected())
                 {
-                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::green);
-                    ui->tableWidget->currentItem()->setText(("House Keeping"));
-                    qDebug() << "Item Selected";
-
-                    //change room status
-                    int col = ui->tableWidget->currentColumn() + 1;
-                    int row = ui->tableWidget->currentRow();
-                    QString room = ui->tableWidget->item(row,col)->text();
-                    room = room.remove("Room #");
-                    for(int i = 0; i<max_rooms; i++)
+                    if(item->column() == 0)
                     {
-                        if(roomlist[i].getNumber() == room.toInt())
-                            roomlist[i].setStatus(40);
+                        item->setBackgroundColor(Qt::green);
+                        item->setText(textHK);
                     }
-                }
-                else
-                {
-                    qDebug() << "No Item Selected";
                 }
             }
         }
     }
 }
 
+// function to send/retrieve data packets to/from Arduinos
 void MainWindow::communicate_Qt_Arduino()
 {
     // for QT to send packets to Arduino
     QByteArray datagram;
     for(int i = 0; i < 2; i++){
-        if(state == 100)
+        if(state == stateCurrent)
         {
-            datagram = QByteArray::number(100);
+            datagram = QByteArray::number(stateCurrent);
         }
-        else if(state == 10)
+        else if(state == stateIdle)
         {
             if(ui->tableWidget->item(0,0)->isSelected()){
                 ui->tableWidget->item(0,0)->setBackgroundColor(Qt::yellow);
             }
-            datagram = QByteArray::number(10);
+            datagram = QByteArray::number(stateIdle);
         }
-        else if(state == 30)
+        else if(state == stateDND)
         {
             if(ui->tableWidget->item(0,0)->isSelected()){
                 ui->tableWidget->item(0,0)->setBackgroundColor(Qt::red);
             }
-            datagram = QByteArray::number(30);
+            datagram = QByteArray::number(stateDND);
         }
-        else if(state == 40)
+        else if(state == stateHK)
         {
             if(ui->tableWidget->item(0,0)->isSelected()){
                 ui->tableWidget->item(0,0)->setBackgroundColor(Qt::green);
             }
-            datagram = QByteArray::number(40);
+            datagram = QByteArray::number(stateHK);
         }
-        if(state == 100 || state == 10 || state == 30 || state == 40){
-
-            socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);
+        if(state == stateCurrent || state == stateIdle || state == stateDND || state == stateHK)
+        {
+            socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduino
         }
     }
     // for QT to read packets from Arduino
@@ -308,20 +290,20 @@ void MainWindow::communicate_Qt_Arduino()
             datagram.resize(socketList[i]->pendingDatagramSize());
             socketList[i]->readDatagram(datagram.data(), datagram.size());
 
-            if(QString(datagram.data()).toInt() == 40)
-            {
-                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::green);
-                ui->tableWidget->item(i,0)->setText("House Keeping");
-            }
-            else if(QString(datagram.data()).toInt() == 30)
-            {
-                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::red);
-                ui->tableWidget->item(i,0)->setText("Do Not Disturb");
-            }
-            else if(QString(datagram.data()).toInt() == 10)
+            if(QString(datagram.data()).toInt() == stateIdle)
             {
                 ui->tableWidget->item(i,0)->setBackgroundColor(Qt::yellow);
-                ui->tableWidget->item(i,0)->setText("Idle");
+                ui->tableWidget->item(i,0)->setText(textIDLE);
+            }
+            else if(QString(datagram.data()).toInt() == stateDND)
+            {
+                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::red);
+                ui->tableWidget->item(i,0)->setText(textDND);
+            }
+            else if(QString(datagram.data()).toInt() == stateHK)
+            {
+                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::green);
+                ui->tableWidget->item(i,0)->setText(textHK);
             }
             // prints out state, room#, ipaddress from Arduino
             qDebug() << datagram.data();
@@ -329,6 +311,7 @@ void MainWindow::communicate_Qt_Arduino()
     }
 }
 
+// function to determine if View Mode's Status/Room/Staff buttons have been pressed
 void MainWindow::changeViewOption()
 {
      QPushButton *b = qobject_cast<QPushButton *>(sender());
@@ -340,18 +323,18 @@ void MainWindow::changeViewOption()
             if(checkStatus == 0)
             {
                 checkStatus = 1;
-                ui->viewStatusButton->setStyleSheet("background-color: rgb(85, 255, 255)");
+                ui->viewStatusButton->setStyleSheet(LIGHT_BLUE);
             }
             else if(checkStatus == 1)
             {
                 checkStatus = 0;
-                state = 100;
+                state = stateCurrent;
             }
             checkRoom = 0;
             checkStaff = 0;
             ui->tableWidget->sortByColumn(0);
-            ui->viewRoomButton->setStyleSheet("background-color:white");
-            ui->viewStaffButton->setStyleSheet("background-color:white");
+            ui->viewRoomButton->setStyleSheet(WHITE);
+            ui->viewStaffButton->setStyleSheet(WHITE);
 
          }
          else if(b == ui->viewRoomButton)
@@ -360,19 +343,19 @@ void MainWindow::changeViewOption()
             {
                 checkRoom = 1;
                 ui->tableWidget->sortItems(1);
-                ui->viewRoomButton->setStyleSheet("background-color: rgb(85, 255, 255)");
-                ui->viewStatusButton->setStyleSheet("background-color:white");
+                ui->viewRoomButton->setStyleSheet(LIGHT_BLUE);
+                ui->viewStatusButton->setStyleSheet(WHITE);
             }
             else if(checkRoom == 1)
             {
                 checkRoom = 0;
-                state = 100;
-                ui->viewStatusButton->setStyleSheet("background-color:rgb(85,255,255)");
-                ui->viewRoomButton->setStyleSheet("background-color:white");
+                state = stateCurrent;
+                ui->viewStatusButton->setStyleSheet(LIGHT_BLUE);
+                ui->viewRoomButton->setStyleSheet(WHITE);
             }
             checkStaff = 0;
             checkStatus = 0;
-            ui->viewStaffButton->setStyleSheet("background-color:white");
+            ui->viewStaffButton->setStyleSheet(WHITE);
          }
          else if(b == ui->viewStaffButton)
          {
@@ -380,19 +363,19 @@ void MainWindow::changeViewOption()
             {
                 checkStaff = 1;
                 ui->tableWidget->sortItems(2);
-                ui->viewStaffButton->setStyleSheet("background-color: rgb(85, 255, 255)");
-                ui->viewStatusButton->setStyleSheet("background-color:white");
+                ui->viewStaffButton->setStyleSheet(LIGHT_BLUE);
+                ui->viewStatusButton->setStyleSheet(WHITE);
             }
             else if(checkStaff == 1)
             {
                 checkStaff = 0;
-                state = 100;
-                ui->viewStatusButton->setStyleSheet("background-color:rgb(85,255,255)");
-                ui->viewStaffButton->setStyleSheet("background-color:white");
+                state = stateCurrent;
+                ui->viewStatusButton->setStyleSheet(LIGHT_BLUE);
+                ui->viewStaffButton->setStyleSheet(WHITE);
             }
             checkRoom = 0;
             checkStatus = 0;
-            ui->viewRoomButton->setStyleSheet("background-color:white");
+            ui->viewRoomButton->setStyleSheet(WHITE);
          }
      }
 }
@@ -402,26 +385,26 @@ void MainWindow::ModeButton_clicked()
     QPushButton *b = qobject_cast<QPushButton *>(sender());
     if(b == ui->viewModeButton)
     {
-        ui->viewModeButton->setStyleSheet("background-color:rgb(85,255,255)");
-        ui->viewStatusButton->setStyleSheet("background-color:rgb(85,255,255)");
-        ui->viewRoomButton->setStyleSheet("background-color:white");
-        ui->viewStaffButton->setStyleSheet("background-color:white");
-        ui->editModeButton->setStyleSheet("background-color:white");
+        ui->viewModeButton->setStyleSheet(LIGHT_BLUE);
+        ui->editModeButton->setStyleSheet(WHITE);
+        ui->changeStatusIdle->setStyleSheet(WHITE);
+        ui->changeStatusDND->setStyleSheet(WHITE);
+        ui->changeStatusHK->setStyleSheet(WHITE);
         checkStatus = 1;
         checkViewMode = 1;
         checkEditMode = 0;
     }
     else if(b == ui->editModeButton)
     {
-        ui->viewModeButton->setStyleSheet("background-color:white");
-        ui->viewStatusButton->setStyleSheet("background-color:white");
-        ui->viewRoomButton->setStyleSheet("background-color:white");
-        ui->viewStaffButton->setStyleSheet("background-color:white");
-        ui->editModeButton->setStyleSheet("background-color:rgb(85,255,255)");
+        ui->viewModeButton->setStyleSheet(WHITE);
+        ui->viewStatusButton->setStyleSheet(WHITE);
+        ui->editModeButton->setStyleSheet(LIGHT_BLUE);
         checkStatus = 0;
         checkViewMode = 0;
         checkEditMode = 1;
     }
+    ui->viewRoomButton->setStyleSheet(WHITE);
+    ui->viewStaffButton->setStyleSheet(WHITE);
 }
 
 // tool button to filter displayed info by floor
@@ -429,75 +412,48 @@ void MainWindow::ModeButton_clicked()
 // ex. floor 3 will reveal all rows with room numbers starting with 3###
 void MainWindow::on_comboBox_activated(const QString &arg1)
 {
-    if(arg1 == "All Floors")
+    // show all rows
+    for(int i = 0; i < max_rooms; i++)
     {
-        for(int i = 0; i < MAX_ROOMS; i++)
-        {
-            ui->tableWidget->showRow(i);
-        }
+        ui->tableWidget->showRow(i);
     }
-    else if(arg1 == "Floor 1")
+    ui->tableWidget->show();
+
+
+    for(int i = 0; i < ui->tableWidget->rowCount(); i++)
     {
-        for(int i = 0; i < MAX_ROOMS; i++)
-        {
-            ui->tableWidget->showRow(i);
-        }
-        ui->tableWidget->show();
-        for(int i = 0; i < ui->tableWidget->rowCount(); i++)
-        {
-            QTableWidgetItem *item = ui->tableWidget->item(i, 1);
-            if(!item->text().contains("Room #10"))
-            {
-                ui->tableWidget->hideRow(i);
-            }
-        }
-    }
-    else if(arg1 == "Floor 2")
-    {
-        for(int i = 0; i < MAX_ROOMS; i++)
-        {
-            ui->tableWidget->showRow(i);
-        }
-        ui->tableWidget->show();
-        for(int i = 0; i < ui->tableWidget->rowCount(); i++)
-        {
-            QTableWidgetItem *item = ui->tableWidget->item(i, 1);
-            if(!item->text().contains("Room #20"))
-            {
-                ui->tableWidget->hideRow(i);
-            }
-        }
-    }
-    else if(arg1 == "Floor 3")
-    {
-        for(int i = 0; i < MAX_ROOMS; i++)
-        {
-            ui->tableWidget->showRow(i);
-        }
-        ui->tableWidget->show();
-        for(int i = 0; i < ui->tableWidget->rowCount(); i++)
-        {
-            QTableWidgetItem *item = ui->tableWidget->item(i, 1);
-            if(!item->text().contains("Room #30"))
-            {
-                ui->tableWidget->hideRow(i);
-            }
-        }
-    }
-    else if(arg1 == "Floor 4")
-    {
-        for(int i = 0; i < MAX_ROOMS; i++)
-        {
-            ui->tableWidget->showRow(i);
-        }
-        ui->tableWidget->show();
-        for(int i = 0; i < ui->tableWidget->rowCount(); i++)
-        {
-            QTableWidgetItem *item = ui->tableWidget->item(i, 1);
-            if(!item->text().contains("Room #40"))
-            {
-                ui->tableWidget->hideRow(i);
-            }
-        }
+         QTableWidgetItem *item = ui->tableWidget->item(i, 1);
+         if(arg1 == "All Floors")
+         {
+            // do nothing. All rows shown in previous loop
+         }
+         else if(arg1 == "Floor 1")
+         {
+             if(!item->text().contains("Room #10"))
+             {
+                 ui->tableWidget->hideRow(i);
+             }
+         }
+         else if(arg1 == "Floor 2")
+         {
+             if(!item->text().contains("Room #20"))
+             {
+                 ui->tableWidget->hideRow(i);
+             }
+         }
+         else if(arg1 == "Floor 3")
+         {
+             if(!item->text().contains("Room #30"))
+             {
+                 ui->tableWidget->hideRow(i);
+             }
+         }
+         else if(arg1 == "Floor 4")
+         {
+             if(!item->text().contains("Room #40"))
+             {
+                 ui->tableWidget->hideRow(i);
+             }
+         }
     }
 }
