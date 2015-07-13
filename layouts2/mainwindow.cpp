@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //4 storey building with 10 rooms on each floor
     int rooms_per_floor = 10;
     int max_rooms = 40;
-    Room roomlist[50];
+    Room roomlist[max_rooms];
     for(int i = 0; i < max_rooms; i++)
     {
         //generate random room info
@@ -82,29 +82,6 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
-    /* initialize random status of rooms, room numbers, and random employee IDs
-    for(int i = 4000; i < 4020; i++)  // randomly chose room numbers ranging from 100-119
-    {
-        int staffID = rand()%99999 + 10000; // maximum of a 5-digit random number
-        int roomStatus = rand()%3;  // randomly select 1 of the 3 room statuses: (Idle, Do Not Disturb, or House Keeping)
-
-        // create tableWidget Items (cells)
-        ui->tableWidget->setItem(i%20+20,0, new QTableWidgetItem(status_states[roomStatus]));
-        ui->tableWidget->setItem(i%20+20,1,new QTableWidgetItem("Room #" + QString::number(i)));
-        ui->tableWidget->setItem(i%20+20,2, new QTableWidgetItem("Employee #" + QString::number(staffID)));
-
-        // change the background color of the cell respective to each room status
-        if(ui->tableWidget->item(i%20+20,0)->text() == "Idle"){
-            ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::yellow);
-        }
-        else if(ui->tableWidget->item(i%20+20,0)->text() == "Do Not Disturb"){
-            ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::red);
-        }
-        else if(ui->tableWidget->item(i%20+20,0)->text() == "House Keeping"){
-            ui->tableWidget->item(i%20+20,0)->setBackgroundColor(Qt::green);
-        }
-    }
-    */
     // ============ END of intiailizing random Rooms ============
 
     // filter to show information about all or specific floors
@@ -142,7 +119,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->changeStatusDND, SIGNAL(clicked()), this, SLOT(changeStatusOption()));
     connect(ui->changeStatusHK, SIGNAL(clicked()), this, SLOT(changeStatusOption()));
 
-
 }
 
 
@@ -167,71 +143,90 @@ void MainWindow::changeStatusOption()
     QPushButton *b = qobject_cast<QPushButton *>(sender());
     if(checkEditMode == 1)
     {
-        ui->tableWidget->setSelectionMode(QTableWidget::SingleSelection);   // hide the highlighting of a cell when a cell is selected
-        if(b == ui->changeStatusIdle)
+        ui->tableWidget->setSelectionMode(QTableWidget::SingleSelection);
+        if(ui->tableWidget->selectedItems().size() != 0)
         {
-            state = 10;
-            ui->changeStatusIdle->setStyleSheet("background-color:yellow");
-            ui->changeStatusDND->setStyleSheet("background-color:white");
-            ui->changeStatusHK->setStyleSheet("background-color:white");
-
-            ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
-
-            if(ui->tableWidget->currentItem()->isSelected())
+            if(b == ui->changeStatusIdle)
             {
-
-                ui->tableWidget->currentItem()->setBackgroundColor(Qt::yellow);
-            }
-        }
-        else if(b == ui->changeStatusDND)
-        {
-            state = 30;
-            if(selectDND == 0)
-            {
-                selectDND = 1;
-                ui->changeStatusDND->setStyleSheet("background-color:red");
-                ui->changeStatusIdle->setStyleSheet("background-color:white");
-            }
-            else if(selectDND == 1)
-            {
-                selectDND = 0;
-                ui->changeStatusDND->setStyleSheet("background-color:white");
+                state = 10;
                 ui->changeStatusIdle->setStyleSheet("background-color:yellow");
-            }
-            selectHK = 0;
+                ui->changeStatusDND->setStyleSheet("background-color:white");
+                ui->changeStatusHK->setStyleSheet("background-color:white");
 
-            ui->changeStatusHK->setStyleSheet("background-color:white");
-            ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
+                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
 
-            if(ui->tableWidget->currentItem()->isSelected())
-            {
-                ui->tableWidget->currentItem()->setBackgroundColor(Qt::red);
+                if(ui->tableWidget->currentItem()->isSelected())
+                {
+                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::yellow);
+                    ui->tableWidget->currentItem()->setText(("Idle"));
+                    qDebug() << "Item Selected";
+                }
+                else
+                {
+                    qDebug() << "No Item Selectd";
+                }
             }
-        }
-
-        else if(b == ui->changeStatusHK)
-        {
-            state = 40;
-            if(selectHK == 0)
+            else if(b == ui->changeStatusDND)
             {
-                selectHK = 1;
-                ui->changeStatusHK->setStyleSheet("background-color:green");
-                ui->changeStatusIdle->setStyleSheet("background-color:white");
-            }
-            else if(selectHK == 1)
-            {
+                state = 30;
+                if(selectDND == 0)
+                {
+                    selectDND = 1;
+                    ui->changeStatusDND->setStyleSheet("background-color:red");
+                    ui->changeStatusIdle->setStyleSheet("background-color:white");
+                }
+                else if(selectDND == 1)
+                {
+                    selectDND = 0;
+                    ui->changeStatusDND->setStyleSheet("background-color:white");
+                    ui->changeStatusIdle->setStyleSheet("background-color:yellow");
+                }
                 selectHK = 0;
                 ui->changeStatusHK->setStyleSheet("background-color:white");
-                ui->changeStatusIdle->setStyleSheet("background-color:yellow");
+
+
+                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
+                if(ui->tableWidget->currentItem()->isSelected())
+                {
+                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::red);
+                    ui->tableWidget->currentItem()->setText(("Do Not Disturb"));
+                    qDebug() << "Item Selected";
+
+                }
+                else{
+                    qDebug() << "No Item Selected";
+                }
             }
-
-            selectDND = 0;
-            ui->changeStatusDND->setStyleSheet("background-color:white");
-
-            ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
-            if(ui->tableWidget->currentItem()->isSelected())
+            else if(b == ui->changeStatusHK)
             {
-                ui->tableWidget->currentItem()->setBackgroundColor(Qt::green);
+                state = 40;
+                if(selectHK == 0)
+                {
+                    selectHK = 1;
+                    ui->changeStatusHK->setStyleSheet("background-color:green");
+                    ui->changeStatusIdle->setStyleSheet("background-color:white");
+                }
+                else if(selectHK == 1)
+                {
+                    selectHK = 0;
+                    ui->changeStatusHK->setStyleSheet("background-color:white");
+                    ui->changeStatusIdle->setStyleSheet("background-color:yellow");
+                }
+
+                selectDND = 0;
+                ui->changeStatusDND->setStyleSheet("background-color:white");
+
+                //ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
+                if(ui->tableWidget->currentItem()->isSelected())
+                {
+                    ui->tableWidget->currentItem()->setBackgroundColor(Qt::green);
+                    ui->tableWidget->currentItem()->setText(("House Keeping"));
+                    qDebug() << "Item Selected";
+                }
+                else
+                {
+                    qDebug() << "No Item Selected";
+                }
             }
         }
     }
@@ -306,6 +301,7 @@ void MainWindow::changeViewOption()
      QPushButton *b = qobject_cast<QPushButton *>(sender());
      if(checkViewMode == 1)
      {
+         ui->tableWidget->setSelectionMode(QTableWidget::NoSelection);
          if(b == ui->viewStatusButton)
          {
             if(checkStatus == 0)
