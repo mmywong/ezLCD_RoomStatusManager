@@ -6,12 +6,11 @@ int checkViewMode = 1;
 int checkEditMode = 0;
 
 // determines the room status in the form of an int to send to/retrieve from the Arduino
-int state = 100;
 int stateIdle = 10;
 int stateDND = 30;
 int stateHK = 40;
-int stateCurrent = 100;
-
+int stateCurrent = 100; //dummy value to initialize binding of socket from Qt to Arduino and read current status
+int state = stateCurrent;
 
 // determines if Status/Staff/Room buttons have been pressed
 int checkStatus = 1;
@@ -23,7 +22,7 @@ int selectIdle = 0;
 int selectDND = 0;
 int selectHK = 0;
 
-// change text display here
+// change text display
 QString textIDLE = "Idle";
 QString textDND = "Do Not Disturb";
 QString textHK = "House Keeping";
@@ -37,8 +36,9 @@ const char* YELLOW = "background-color:yellow";
 // array of used IP addresses by Arduinos
 QString ip[5] = {"172.21.42.57", "172.21.42.58"};
 
-//
-const int max_rooms = 40;
+// room information
+const int max_rooms = 60;
+const int max_lcds = 2;
 int rooms_per_floor = 15;
 Room roomlist[max_rooms];
 QString status_name(int stat_in_int);
@@ -152,11 +152,9 @@ MainWindow::~MainWindow()
 QString status_name(int stat_in_int){
     if(stat_in_int == stateIdle)
         return textIDLE;
-    //if(stat_in_int == 20)
-      //  return IDLE;
-    if(stat_in_int == stateDND)
+    else if(stat_in_int == stateDND)
         return textDND;
-    if(stat_in_int == stateHK)
+    else if(stat_in_int == stateHK)
         return textHK;
 }
 
@@ -183,10 +181,10 @@ void MainWindow::changeStatusOption()
 
                 if(item->isSelected())
                 {
-                    if(item->column() == 0)
+                    if(item->column() == 1)
                     {
-                        item->setBackgroundColor(Qt::yellow);
-                        item->setText(textIDLE);
+                        ui->tableWidget->item(item->row(),0)->setBackgroundColor(Qt::yellow);
+                        ui->tableWidget->item(item->row(),0)->setText(textIDLE);
 
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
@@ -194,7 +192,7 @@ void MainWindow::changeStatusOption()
                             if(roomlist[i].getNumber() == room.toInt())
                             {
                                 roomlist[i].setStatus(stateIdle);
-                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
@@ -220,10 +218,10 @@ void MainWindow::changeStatusOption()
 
                 if(item->isSelected())
                 {
-                    if(item->column() == 0)
+                    if(item->column() == 1)
                     {
-                        ui->tableWidget->currentItem()->setBackgroundColor(Qt::red);
-                        ui->tableWidget->currentItem()->setText(textDND);
+                        ui->tableWidget->item(item->row(),0)->setBackgroundColor(Qt::red);
+                        ui->tableWidget->item(item->row(),0)->setText(textDND);
 
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
@@ -231,7 +229,7 @@ void MainWindow::changeStatusOption()
                             if(roomlist[i].getNumber() == room.toInt())
                             {
                                 roomlist[i].setStatus(stateDND);
-                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
@@ -258,10 +256,10 @@ void MainWindow::changeStatusOption()
 
                 if(item->isSelected())
                 {
-                    if(item->column() == 0)
+                    if(item->column() == 1)
                     {
-                        item->setBackgroundColor(Qt::green);
-                        item->setText(textHK);
+                        ui->tableWidget->item(item->row(),0)->setBackgroundColor(Qt::green);
+                        ui->tableWidget->item(item->row(),0)->setText(textHK);
 
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
@@ -269,7 +267,7 @@ void MainWindow::changeStatusOption()
                             if(roomlist[i].getNumber() == room.toInt())
                             {
                                 roomlist[i].setStatus(stateHK);
-                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
@@ -287,7 +285,7 @@ void MainWindow::communicate_Qt_Arduino()
     ui->tableWidget->setSelectionMode(QTableWidget::SingleSelection);
     QTableWidgetItem *item = ui->tableWidget->currentItem();
 
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < max_lcds; i++)
     {
         if(state == stateCurrent)
         {
@@ -311,44 +309,61 @@ void MainWindow::communicate_Qt_Arduino()
             {
                 if(item->isSelected())
                 {
-                    if(item->column() == 0)
+                    if(item->column() == 1)
                     {
-
                         socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduino
+                        qDebug() << "Sending: " << datagram.data();
                     }
                 }
             }
         }
+        // if not state changes, send dummy data to establish socket connection
         else if(state == stateCurrent)
         {
              socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduin
         }
     }
     // for QT to read packets from Arduino
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < max_lcds; i++)
     {
         if(socketList[i]->hasPendingDatagrams())
         {
             datagram.resize(socketList[i]->pendingDatagramSize());
             socketList[i]->readDatagram(datagram.data(), datagram.size());
+            QString status_room(datagram.data());
+            //qDebug() << status_room;
+            QString status_only = status_room.left(2);
+            QString room_only = status_room.right(4);
+            //qDebug() << status_only << room_only;
 
-            if(QString(datagram.data()).toInt() == stateIdle)
+            for(int row = 0; row < max_rooms; row++)
             {
-                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::yellow);
-                ui->tableWidget->item(i,0)->setText(textIDLE);
+                //qDebug() << room_only.toInt() << " " << roomlist[j].getNumber();
+                if(room_only.toInt() == roomlist[row].getNumber())
+                {
+                    qDebug() << "Room #" << roomlist[row].getNumber();
+                    if(status_only.toInt() == stateIdle)
+                    {
+                        ui->tableWidget->item(row, 0)->setBackgroundColor(Qt::yellow);
+                        ui->tableWidget->item(row,0)->setText(textIDLE);
+                        roomlist[row].setStatus(stateIdle);
+                    }
+                    else if(status_only.toInt() == stateDND)
+                    {
+                        ui->tableWidget->item(row,0)->setBackgroundColor(Qt::red);
+                        ui->tableWidget->item(row,0)->setText(textDND);
+                        roomlist[row].setStatus(stateDND);
+                    }
+                    else if(status_only.toInt() == stateHK)
+                    {
+                        ui->tableWidget->item(row,0)->setBackgroundColor(Qt::green);
+                        ui->tableWidget->item(row,0)->setText(textHK);
+                        roomlist[row].setStatus(stateHK);
+                    }
+                }
             }
-            else if(QString(datagram.data()).toInt() == stateDND)
-            {
-                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::red);
-                ui->tableWidget->item(i,0)->setText(textDND);
-            }
-            else if(QString(datagram.data()).toInt() == stateHK)
-            {
-                ui->tableWidget->item(i,0)->setBackgroundColor(Qt::green);
-                ui->tableWidget->item(i,0)->setText(textHK);
-            }
-            // prints out state, room#, ipaddress from Arduino
-            //qDebug() << datagram.data();
+            // prints out state|room# from Arduino
+            qDebug() << "Pending: " << datagram.data();
         }
     }
 }

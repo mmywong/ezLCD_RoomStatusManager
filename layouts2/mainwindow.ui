@@ -17,9 +17,6 @@
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="4" column="4">
-       <widget class="QComboBox" name="comboBox"/>
-      </item>
       <item row="5" column="1">
        <widget class="QPushButton" name="changeStatusIdle">
         <property name="styleSheet">
@@ -30,6 +27,9 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="4">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
       <item row="5" column="3">
        <widget class="QPushButton" name="changeStatusHK">
         <property name="styleSheet">
@@ -37,16 +37,6 @@
         </property>
         <property name="text">
          <string>change to House Keeping</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QPushButton" name="changeStatusDND">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>change to Do Not Disturb</string>
         </property>
        </widget>
       </item>
@@ -60,8 +50,15 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="4">
-       <widget class="QTableWidget" name="tableWidget"/>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="changeStatusDND">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>change to Do Not Disturb</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="3">
        <widget class="QPushButton" name="viewStaffButton">
@@ -70,6 +67,16 @@
         </property>
         <property name="text">
          <string>Sort by/View Staff</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="viewRoomButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by/View Room</string>
         </property>
        </widget>
       </item>
@@ -93,15 +100,8 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="viewRoomButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Sort by/View Room</string>
-        </property>
-       </widget>
+      <item row="4" column="0" colspan="4">
+       <widget class="QTableWidget" name="tableWidget"/>
       </item>
      </layout>
     </item>
