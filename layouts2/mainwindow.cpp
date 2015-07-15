@@ -165,16 +165,31 @@ void MainWindow::changeStatusOption()
     if(checkEditMode == 1)
     {
         ui->tableWidget->setSelectionMode(QTableWidget::SingleSelection);
-        int col = ui->tableWidget->currentColumn() + 1;
+
+        //to identify which room we're selecting
+        int col = ui->tableWidget->currentColumn();
         int row = ui->tableWidget->currentRow();
-        QString room = ui->tableWidget->item(row,col)->text();
-        room = room.remove("Room #");
+        QString room_num = ui->tableWidget->item(row,col)->text();
+        room_num = room_num.remove("Room #");
+        Room room;
+        for(int i = 0; i < max_rooms; i++)
+        {
+            if(roomlist[i].getNumber() == room_num.toInt())
+            {
+                room = roomlist[i];
+            }
+        }
+
+
         if(ui->tableWidget->selectedItems().size() != 0)
         {
             QTableWidgetItem *item = ui->tableWidget->currentItem();
+            //-----------idle------------//
             if(b == ui->changeStatusIdle)
             {
                 state = stateIdle;
+                room.setStatus(stateIdle);
+
                 ui->changeStatusIdle->setStyleSheet(YELLOW);
                 ui->changeStatusDND->setStyleSheet(WHITE);
                 ui->changeStatusHK->setStyleSheet(WHITE);
@@ -189,18 +204,21 @@ void MainWindow::changeStatusOption()
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
                         {
-                            if(roomlist[i].getNumber() == room.toInt())
+                            if(roomlist[i].getNumber() == room_num.toInt())
                             {
                                 roomlist[i].setStatus(stateIdle);
-                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
                 }
             }
+            //-----------do not disturb------------//
             else if(b == ui->changeStatusDND)
             {
                 state = stateDND;
+               room.setStatus(stateDND);
+
                 if(selectDND == 0)
                 {
                     selectDND = 1;
@@ -226,18 +244,21 @@ void MainWindow::changeStatusOption()
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
                         {
-                            if(roomlist[i].getNumber() == room.toInt())
+                            if(roomlist[i].getNumber() == room_num.toInt())
                             {
                                 roomlist[i].setStatus(stateDND);
-                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
                 }
             }
+            //-----------housekeeping------------//
             else if(b == ui->changeStatusHK)
             {
                 state = stateHK;
+                room.setStatus(stateHK);
+
                 if(selectHK == 0)
                 {
                     selectHK = 1;
@@ -264,10 +285,10 @@ void MainWindow::changeStatusOption()
                         //change room status
                         for(int i = 0; i<max_rooms; i++)
                         {
-                            if(roomlist[i].getNumber() == room.toInt())
+                            if(roomlist[i].getNumber() == room_num.toInt())
                             {
                                 roomlist[i].setStatus(stateHK);
-                                //qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
+                                qDebug() << "Room #" << roomlist[i].getNumber() << "|Status: " << roomlist[i].getStatus();
                             }
                         }
                     }
