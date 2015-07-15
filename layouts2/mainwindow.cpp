@@ -39,9 +39,12 @@ QString ip[5] = {"172.21.42.57", "172.21.42.58"};
 // room information
 const int max_rooms = 60;
 const int max_lcds = 2;
+const int max_floors = 4;
 int rooms_per_floor = 15;
 Room roomlist[max_rooms];
 QString status_name(int stat_in_int);
+QString room_floor_list[max_floors];
+QString room_floor_list_int[max_floors];
 
 // initial Main Window setup
 MainWindow::MainWindow(QWidget *parent) :
@@ -107,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // initialize combobox widget for filter to show information about all or specific floors
     ui->comboBox->addItem(tr("All Floors"));
-    for(int i = 1; i < 5; i++)
+    for(int i = 1; i < max_floors+1; i++)
     {
         char str[10];
         char num[10];
@@ -115,6 +118,15 @@ MainWindow::MainWindow(QWidget *parent) :
         strcpy(str, "Floor ");
         strcat(str, num);
         ui->comboBox->addItem(tr(str));
+    }
+
+    // filter by floor
+    for(int i = 0; i < max_floors; i++)
+    {
+        room_floor_list[i] = QString("Room #%1").arg(i+1);
+        room_floor_list_int[i] = QString("Room #%1").arg(i+1);
+        room_floor_list_int[i].remove("Room #");
+        //qDebug() << i << room_floor_list[i] << room_floor_list_int[i];
     }
 
     // create multiple sockets to send/retrieve data packets to/from Arduino
@@ -179,7 +191,6 @@ void MainWindow::changeStatusOption()
                 room = roomlist[i];
             }
         }
-
 
         if(ui->tableWidget->selectedItems().size() != 0)
         {
@@ -308,83 +319,94 @@ void MainWindow::communicate_Qt_Arduino()
 
     for(int i = 0; i < max_lcds; i++)
     {
-        if(state == stateCurrent)
+        if(checkEditMode == 1)
         {
-            datagram = QByteArray::number(stateCurrent);
-        }
-        else if(state == stateIdle)
-        {
-            datagram = QByteArray::number(stateIdle);
-        }
-        else if(state == stateDND)
-        {
-            datagram = QByteArray::number(stateDND);
-        }
-        else if(state == stateHK)
-        {
-            datagram = QByteArray::number(stateHK);
-        }
-        if(state == stateIdle || state == stateDND || state == stateHK)
-        {
-            if(ui->tableWidget->selectedItems().size() != 0)
+            if(state == stateCurrent)
             {
-                if(item->isSelected())
+                datagram = QByteArray::number(stateCurrent);
+            }
+            else if(state == stateIdle)
+            {
+                datagram = QByteArray::number(stateIdle);
+            }
+            else if(state == stateDND)
+            {
+                datagram = QByteArray::number(stateDND);
+            }
+            else if(state == stateHK)
+            {
+                datagram = QByteArray::number(stateHK);
+            }
+            if(state == stateIdle || state == stateDND || state == stateHK)
+            {
+                if(ui->tableWidget->selectedItems().size() != 0)
                 {
-                    if(item->column() == 1)
+                    if(item->isSelected())
                     {
-                        socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduino
-                        qDebug() << "Sending: " << datagram.data();
+                        if(item->column() == 1)
+                        {
+                            socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduino
+                            qDebug() << "Sending: " << datagram.data();
+                        }
                     }
                 }
             }
         }
         // if not state changes, send dummy data to establish socket connection
-        else if(state == stateCurrent)
+        else if(checkEditMode == 0)
         {
-             socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduin
+            if(state == stateCurrent)
+            {
+                 socketList[i]->writeDatagram(datagram.data(), datagram.size(), QHostAddress(ip[i]), 99);    // establishes socket binding connection between Qt and Arduin
+                 //qDebug() << "Dummy";
+            }
         }
+
     }
     // for QT to read packets from Arduino
     for(int i = 0; i < max_lcds; i++)
     {
-        if(socketList[i]->hasPendingDatagrams())
+        if(checkViewMode == 1)
         {
-            datagram.resize(socketList[i]->pendingDatagramSize());
-            socketList[i]->readDatagram(datagram.data(), datagram.size());
-            QString status_room(datagram.data());
-            //qDebug() << status_room;
-            QString status_only = status_room.left(2);
-            QString room_only = status_room.right(4);
-            //qDebug() << status_only << room_only;
-
-            for(int row = 0; row < max_rooms; row++)
+            if(socketList[i]->hasPendingDatagrams())
             {
-                //qDebug() << room_only.toInt() << " " << roomlist[j].getNumber();
-                if(room_only.toInt() == roomlist[row].getNumber())
+                datagram.resize(socketList[i]->pendingDatagramSize());
+                socketList[i]->readDatagram(datagram.data(), datagram.size());
+                QString status_room(datagram.data());
+                //qDebug() << status_room;
+                QString status_only = status_room.left(2);
+                QString room_only = status_room.right(4);
+                //qDebug() << status_only << room_only;
+
+                for(int row = 0; row < max_rooms; row++)
                 {
-                    qDebug() << "Room #" << roomlist[row].getNumber();
-                    if(status_only.toInt() == stateIdle)
+                    //qDebug() << room_only.toInt() << " " << roomlist[j].getNumber();
+                    if(room_only.toInt() == roomlist[row].getNumber())
                     {
-                        ui->tableWidget->item(row, 0)->setBackgroundColor(Qt::yellow);
-                        ui->tableWidget->item(row,0)->setText(textIDLE);
-                        roomlist[row].setStatus(stateIdle);
-                    }
-                    else if(status_only.toInt() == stateDND)
-                    {
-                        ui->tableWidget->item(row,0)->setBackgroundColor(Qt::red);
-                        ui->tableWidget->item(row,0)->setText(textDND);
-                        roomlist[row].setStatus(stateDND);
-                    }
-                    else if(status_only.toInt() == stateHK)
-                    {
-                        ui->tableWidget->item(row,0)->setBackgroundColor(Qt::green);
-                        ui->tableWidget->item(row,0)->setText(textHK);
-                        roomlist[row].setStatus(stateHK);
+                        qDebug() << "Room #" << roomlist[row].getNumber();
+                        if(status_only.toInt() == stateIdle)
+                        {
+                            ui->tableWidget->item(row, 0)->setBackgroundColor(Qt::yellow);
+                            ui->tableWidget->item(row,0)->setText(textIDLE);
+                            roomlist[row].setStatus(stateIdle);
+                        }
+                        else if(status_only.toInt() == stateDND)
+                        {
+                            ui->tableWidget->item(row,0)->setBackgroundColor(Qt::red);
+                            ui->tableWidget->item(row,0)->setText(textDND);
+                            roomlist[row].setStatus(stateDND);
+                        }
+                        else if(status_only.toInt() == stateHK)
+                        {
+                            ui->tableWidget->item(row,0)->setBackgroundColor(Qt::green);
+                            ui->tableWidget->item(row,0)->setText(textHK);
+                            roomlist[row].setStatus(stateHK);
+                        }
                     }
                 }
+                // prints out state|room# from Arduino
+                qDebug() << "Pending: " << datagram.data();
             }
-            // prints out state|room# from Arduino
-            qDebug() << "Pending: " << datagram.data();
         }
     }
 }
@@ -497,40 +519,27 @@ void MainWindow::on_comboBox_activated(const QString &arg1)
     }
     ui->tableWidget->show();
 
-
     for(int i = 0; i < ui->tableWidget->rowCount(); i++)
     {
          QTableWidgetItem *item = ui->tableWidget->item(i, 1);
          if(arg1 == "All Floors")
          {
             // do nothing. All rows shown in previous loop
+            //qDebug() << "All Floors";
          }
-         else if(arg1 == "Floor 1")
+         else
          {
-             if(!item->text().contains("Room #10"))
+             for(int k = 0; k < max_floors; k++)
              {
-                 ui->tableWidget->hideRow(i);
-             }
-         }
-         else if(arg1 == "Floor 2")
-         {
-             if(!item->text().contains("Room #20"))
-             {
-                 ui->tableWidget->hideRow(i);
-             }
-         }
-         else if(arg1 == "Floor 3")
-         {
-             if(!item->text().contains("Room #30"))
-             {
-                 ui->tableWidget->hideRow(i);
-             }
-         }
-         else if(arg1 == "Floor 4")
-         {
-             if(!item->text().contains("Room #40"))
-             {
-                 ui->tableWidget->hideRow(i);
+                 if(ui->comboBox->currentText().remove("Floor ").toInt() == room_floor_list_int[k].toInt())
+                 {
+                     //qDebug() << k << ui->comboBox->currentText().remove("Floor ").toInt() << room_floor_list_int[k].toInt() << room_floor_list[k];
+                     if(!item->text().contains(room_floor_list[k]))
+                     {
+                         //qDebug() << room_floor_list[k];
+                         ui->tableWidget->hideRow(i);
+                     }
+                 }
              }
          }
     }
