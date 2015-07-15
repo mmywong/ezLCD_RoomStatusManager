@@ -8,19 +8,19 @@ ezLCD3 lcd;
 // Each Inside LCD needs a unique mac and ip
 // have 2 sets of mac and ip below to test 2 LCDs
 // upload sketch with 1 or the other for each LCD
-/*
+
 byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCC }; 
 byte ip[] = { 172, 21, 42, 58 }; 
 char *ipaddress = "172.21.42.58";
 byte localPort = 99;
 char room[10] = "4012";
-*/
+/*
 byte mac[] = { 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCB };  // unique mac address
 byte ip[] = { 172, 21, 42, 57 };                      // unique ip address
 char *ipaddress = "172.21.42.57";                     // ip address in string form. might be used to pass into Qt
 byte localPort = 99;                                  // hardcoded localPort
 char room[10] = "4011";                               // room number. might be used to pass into Qt
-
+*/
 char roombuf[10]; // buffer to hold the room number
 
 EthernetUDP Udp;
@@ -60,12 +60,22 @@ void Tick_State(){
         Choice();                                               // being pressed takes you to the Choice screen
         state = Select;                                         // state changed to Select
       }
+      else if(r == stateHK)
+      {
+        HouseKeeping();                                           // being pressed takes you to the house keeping screen
+        state = HK;
+      }
       break;
     case HK: // same as homescreen
       if((lcd.currentWidget==1) && (lcd.currentInfo==PRESSED) || r == stateIDLE)
       {                                                        // widget 1 is on DND and HK screen
         Choice();                                              // being pressed takes you to the Choice screen
         state = Select;                                        // state changed to Select
+      }
+      else if(r == stateDND)
+      {
+        DoNotDisturb();                                           //being pressed take you to the do not disturb screen
+        state = DND;
       }
       break;
     default: // default state
@@ -127,7 +137,6 @@ void writeStatus(int x){
     if(r != 100  && r != x)
     {
       x = r;
-      state = Select;
     }   
     itoa(x, buffer, 10);
 
