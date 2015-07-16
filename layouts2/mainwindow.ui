@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
-    <height>530</height>
+    <width>1042</width>
+    <height>658</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,80 +17,13 @@
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="5" column="1">
-       <widget class="QPushButton" name="changeStatusIdle">
-        <property name="styleSheet">
-         <string notr="true">background-color:white</string>
-        </property>
-        <property name="text">
-         <string>change to Idle</string>
-        </property>
-       </widget>
+      <item row="4" column="2" colspan="5">
+       <widget class="QTableWidget" name="tableWidget"/>
       </item>
-      <item row="4" column="4">
-       <widget class="QComboBox" name="comboBox"/>
-      </item>
-      <item row="5" column="3">
-       <widget class="QPushButton" name="changeStatusHK">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>change to House Keeping</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QPushButton" name="editModeButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:white</string>
-        </property>
-        <property name="text">
-         <string>Edit Mode</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QPushButton" name="changeStatusDND">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>change to Do Not Disturb</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="viewStaffButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Sort by/View Staff</string>
-        </property>
-       </widget>
+      <item row="1" column="6">
+       <widget class="QComboBox" name="comboBoxFilter"/>
       </item>
       <item row="1" column="2">
-       <widget class="QPushButton" name="viewRoomButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(255, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Sort by/View Room</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="viewStatusButton">
-        <property name="styleSheet">
-         <string notr="true">background-color:rgb(85, 255, 255)</string>
-        </property>
-        <property name="text">
-         <string>Sort by/View Status</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
        <widget class="QPushButton" name="viewModeButton">
         <property name="styleSheet">
          <string notr="true">background-color:rgb(85,255,255)</string>
@@ -100,8 +33,89 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="4">
-       <widget class="QTableWidget" name="tableWidget"/>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="viewStatusButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:white</string>
+        </property>
+        <property name="text">
+         <string>Sort by Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="changeStatusIdle">
+        <property name="styleSheet">
+         <string notr="true">background-color:white</string>
+        </property>
+        <property name="text">
+         <string>Idle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QPushButton" name="editModeButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:white</string>
+        </property>
+        <property name="text">
+         <string>Edit Mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="4">
+       <widget class="QPushButton" name="changeStatusHK">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>House Keeping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="changeStatusDND">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Do Not Disturb</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="viewRoomButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(85, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by Room</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_time">
+        <property name="text">
+         <string>Time Status Changed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="6">
+       <widget class="QLabel" name="label_ipaddr">
+        <property name="text">
+         <string>----IP Address----</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QPushButton" name="viewStaffButton">
+        <property name="styleSheet">
+         <string notr="true">background-color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Sort by Staff</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
